@@ -22,7 +22,7 @@ local function getBasalt()
 end
 
 --- Read a template file et convert it into a table.
---- @param filepath string Template's filepath
+--- @param filepath string Template's file path
 --- @return table|nil template
 --- @return string|nil message Message if the file can't be read or is invalid
 local function readTemplate(filepath)
@@ -40,5 +40,25 @@ local function readTemplate(filepath)
     return template
 end
 
+--- Create a PageManager(not implemented yet) from a template(either file path or table)
+--- Throw a error if the file can't be read, if the template isn't a table or Basalt can't be found
+--- @param template string|table Template's file path or as a table
+--- @param functions table<string, function>|nil Functions usable in the template by name
+--- @return PageManager manager
+function HTMLUA.newPageManager(template, functions)
+    local templateData = template
+    if type(template) == "string" then
+        local readError
+        templateData, readError = readTemplate(template)
+        if not templateData then
+            error("HTMLUA.newPageManager: " .. readError, 2)
+        end
+    end
+    if type(templateData) ~= "table" then
+        error("HTMLUA.newPageManager: file path or table expected, got" .. type(template), 2)
+    end
+
+    return nil -- will return the result of the PageManager builder using the template's table and functions
+end
 
 return HTMLUA
