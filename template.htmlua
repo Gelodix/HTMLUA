@@ -1,0 +1,80 @@
+{
+    pages = {
+        {
+            name = "main",
+            type = "page",
+            position = {x = 1, y = 1},
+            size = {x = 51, y = 19},
+            content = {
+                {
+                    name = "loginForm",
+                    type = "form",
+                    position = {x = 6, y = 2},
+                    size = {x = 41, y = 17},
+                    confirmFunction = {"loginConfirm"},
+                    onConfirm = {"redirect", "secondary"},
+                    messageLabel = "messageLoginLabel",
+                    content = {
+                        {
+                            name = "nameLoginLabel",
+                            type = "label",
+                            text = "Name:",
+                            position = {x = 6, y = 2},
+                        },
+                        {
+                            name = "nameLoginInput",
+                            type = "formInput",
+                            inputType = "",
+                            regex = "",
+                            text = "",
+                            position = {x = 6, y = 3},
+                            size = {x = 31, y = 1},
+                        },
+                        {
+                            name = "passwordLoginLabel",
+                            type = "label",
+                            text = "Password:",
+                            position = {x = 6, y = 5},
+                        },
+                        {
+                            name = "passwordLoginInput",
+                            type = "formInput",
+                            inputType = "password",
+                            regex = "",
+                            text = "",
+                            position = {x = 6, y = 6},
+                            size = {x = 31, y = 1},
+                        },
+                        {
+                            name = "messageLoginLabel",
+                            type = "label",
+                            text = "",
+                            position = {x = 6, y = 10},
+                        },
+                        {
+                            name = "loginButton",
+                            type = "confirmFormButton",
+                            text = "Login",
+                            position = {x = 6, y = 13},
+                            size = {x = 31, y = 3},
+                        },
+                    }
+                },
+
+            },
+        },
+        {
+            name = "secondary",
+            type = "page",
+            content = {
+                {
+                    name = "second label",
+                    type = "label",
+                    text = "Test label",
+                    position = {x = 2, y = 2},
+                },
+            },
+        },
+    },
+    default_page = "main",
+}
