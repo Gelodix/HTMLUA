@@ -1,5 +1,8 @@
 --- Entry point of the library.
 --- only this file need to be manually loaded when using the libray
+local modulePrefix = (...):match("^(.-)[^%./]+$") or ""
+local PagesManager = require(modulePrefix .. "htmlua_files.PagesManager")
+
 local HTMLUA = {}
 local basalt = nil
 
@@ -58,7 +61,7 @@ function HTMLUA.newPageManager(template, functions)
         error("HTMLUA.newPageManager: file path or table expected, got" .. type(template), 2)
     end
 
-    return nil -- will return the result of the PageManager builder using the template's table and functions
+    return PagesManager.new(getBasalt(), templateData, functions)
 end
 
 return HTMLUA
