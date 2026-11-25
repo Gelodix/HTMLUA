@@ -70,9 +70,9 @@ function PageManager:showPage(pageName)
 
     for name, page in pairs(self.pages) do
         if name == pageName then
-            -- set page's container visibility to true
+            page:show()
         else
-            -- set page's container visibility to false
+            page:hide()
         end
     end
 

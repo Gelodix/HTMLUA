@@ -194,7 +194,28 @@ function Element.new(parent, data, manager)
     return self
 end
 
+function Element:find(name)
+    if self.name == name then
+        return self
+    end
+    return nil
+end
 
+function Element:show()
+    self.basaltElement:setVisible(true)
+end
+
+function Element:hide()
+    self.basaltElement:setVisible(false)
+end
+
+function Element:getText()
+    return self.basaltElement:getText()
+end
+
+function Element:setText(text)
+    self.basaltElement:setText(text)
+end
 
 
 return Element

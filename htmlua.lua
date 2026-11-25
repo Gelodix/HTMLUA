@@ -1,7 +1,7 @@
 --- Entry point of the library.
 --- only this file need to be manually loaded when using the libray
 local modulePrefix = (...):match("^(.-)[^%./]+$") or ""
-local PagesManager = require(modulePrefix .. "htmlua_files.PagesManager")
+local PagesManager = require(modulePrefix .. "htmlua_files.pagesManager")
 
 local HTMLUA = {}
 local basalt = nil
