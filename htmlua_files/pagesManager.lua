@@ -121,6 +121,25 @@ function PageManager:build()
     return self:showPage(self.default)
 end
 
+--- Add a new usable function for the template or replace one with the same name
+--- @param name string The name of the function in the template
+--- @param task function The function called with (manager, element, args from template)
+--- @return PageManager self The manager to chain calls
+function PageManager:addFunction(name, task)
+    if self.built then error(("PageManager:addFunction: pages are already built, adding functions will not have any effect"), 2) end
+
+    if type(task) ~= "function" then
+        error("PageManager:addFunction: expected function, got" .. type(task), 2)
+    end
+
+    if type(name) ~= "string" then
+        error("PageManager:addFunction: expected string, got" .. type(name), 2)
+    end
+
+    self.functions[name] = task
+    return self
+end
+
 --- Show a page and hide every other ones. If page don't exist, don't change anything.
 --- Throw a error if used before build()
 --- @param pageName string The name of the page to show
