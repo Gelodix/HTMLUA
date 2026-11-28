@@ -53,6 +53,13 @@ local function setupForm(self, data, manager)
     return true
 end
 
+--- Create a new container
+--- @param parent table Basalt container element
+--- @param data table part of the template
+--- @param manager table Object with the 'functions' table
+--- @param form table|nil Containing form given by Container
+--- @return Container|nil container
+--- @return string|nil message Message naming the faulty element if the template if invalid
 function Container.new(parent, data, manager, form)
     if type(data) ~= "table" then
         return nil, "Container: table expected, got " .. type(data)
@@ -121,6 +128,7 @@ function Container:isForm()
 end
 
 
+
 --- Form : return values from the form's inputs
 --- Throw a error if the container isn't a form
 --- @return table values Table { input name = value }
@@ -137,6 +145,27 @@ function Container:getValues()
     return values
 end
 
+--- Form : verify the form content based on the confirmFunction 
+--- @return boolean confirm true if the form is validated
+--- @return string|nil message Message if the form content is invalid
+function Container:confirm()
+    if not self:isForm() then
+        error(("Container:confirm: %s is not a form")
+            :format(Element._describe(self)), 2)
+    end
+
+    local accepted, message = true, nil
+    if self.confirmFunction then
+        accepted, message = self.confirmFunction(self, self:getValues())
+    end
+    if self.messageLabel then
+        self.messageLabel:setText(message ~= nil and tostring(message) or "")
+    end
+
+    if not accepted then return false, message end
+    if self.onConfirm then self.onConfirm(self) end
+    return true
+end
 
 
 return Container

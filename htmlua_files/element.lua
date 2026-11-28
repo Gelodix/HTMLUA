@@ -26,8 +26,8 @@ Element.TYPES = {
     label             = {add = "addLabel"},
     button            = {add = "addButton", defaults = {background = "blue"}},
     input             = {add = "addInput", fields = INPUT_FIELDS, events = {"onEnter", "onChange"}},
-    formInput         = {add = "addInput", fields = INPUT_FIELDS, events = {"onEnter", "onChange"}},
-    confirmFormButton = {add = "addButton", defaults = {background = "green"}},
+    formInput         = {add = "addInput", fields = INPUT_FIELDS, events = {"onEnter", "onChange"}, formRole = "input"},
+    confirmFormButton = {add = "addButton", defaults = {background = "green"}, formRole = "confirm"},
 }
 
 --- Describe a element for error messages
@@ -205,7 +205,49 @@ local function bindEvents(self, data, typeData, manager)
     return bound
 end
 
-function Element:_init(typeData, parent, data, manager)
+
+--- Attach a formInput or confirmFormButton to its form
+--- @param self Element The element under construction
+--- @param typeData table TYPES entries corresponding to data.type
+--- @param form table|nil The parent form
+--- @param bound table bindEvents result
+--- @return true|nil ok
+--- @return string|nil message Message if the element is out of the form, without name or in duplicate
+local function joinForm(self, typeData, form, bound)
+    if not form then
+        return nil, "must be inside a form"
+    end
+
+    if typeData.formRole == "input" then
+        if type(self.name) ~= "string" or self.name == "" then
+            return nil, "a form input needs a name"
+        end
+        for _, other in ipairs(form.inputs) do
+            if other.name == self.name then
+                return nil, "duplicate input name in the form"
+            end
+        end
+        form.inputs[#form.inputs + 1] = self
+        if not bound.onEnter then
+            self.basaltElement:onEnter(function() form:confirm() end)
+        end
+    elseif not bound.onClick then
+        self.basaltElement:onClick(function() form:confirm() end)
+    end
+    return true
+end
+
+--- Initialize the element
+--- Check the template's fields, build the properties, create the Basalt element,
+--- bind the events and attach a element to its form if it has a formRole.
+--- @param typeData table TYPES entries corresponding to data.type
+--- @param parent table Basalt container element
+--- @param data table part of the template
+--- @param manager table Object with the 'functions' table
+--- @param form table|nil Containing form
+--- @return true|nil ok
+--- @return string|nil message Message if the template is invalid
+function Element:_init(typeData, parent, data, manager, form)
     local fieldsOk, fieldsError = checkFields(data, typeData)
     if not fieldsOk then return nil, fieldsError end
 
@@ -219,6 +261,10 @@ function Element:_init(typeData, parent, data, manager)
     local bound, bindError = bindEvents(self, data, typeData, manager)
     if not bound then return nil, bindError end
 
+    if typeData.formRole then
+        return joinForm(self, typeData, form, bound)
+    end
+
     return true
 
 end
@@ -229,7 +275,7 @@ end
 --- @param manager table Object with the 'functions' table
 --- @param form table|nil Containing form given by Container
 --- @return Element|nil element
---- @return string|nil message Message naming the faulty element if the template if invalid
+--- @return string|nil message Message naming the faulty element if the template is invalid
 function Element.new(parent, data, manager, form)
     if type(data) ~= "table" then
         return nil, "Element: table expected, got " .. type(data)
@@ -242,7 +288,7 @@ function Element.new(parent, data, manager, form)
 
     local self = setmetatable({}, Element)
 
-    local ok, initError = self:_init(typeData, parent, data, manager)
+    local ok, initError = self:_init(typeData, parent, data, manager, form)
 
     if not ok then
         return nil, ("%s: %s"):format(Element._describe(data), initError)
