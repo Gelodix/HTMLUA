@@ -1,3 +1,7 @@
+local modulePrefix = (...):match("^(.-)[^%./]+$") or ""
+local Container = require(modulePrefix .. "container")
+
+
 --- @class PageManager
 --- @field basalt table Basalt instance used by the manager
 --- @field basaltMainFrame table Basalt's main frame
@@ -29,6 +33,41 @@ local BUILTIN_FUNCTIONS = {
     end,
 }
 
+--- Verify the template and build each pages in the root frame
+--- @param root table Basalt frame on which pages will be added
+--- @param manager PageManager Give the template, the default page and the functions
+--- @return table<string, Container>|nil pages Pages by name
+--- @return string|nil message Message if the template is invalid
+local function buildPages(root, manager)
+    local template = manager.template
+    if type(template.pages) ~= "table" then
+        return nil, "pages: table expected, got " .. type(template.pages)
+    end
+
+    local pages = {}
+    for index, pageData in ipairs(template.pages) do
+        if type(pageData) ~= "table" then
+            return nil, ("page #%d: table expected, got %s"):format(index, type(pageData))
+        end
+
+        local name = pageData.name
+        if type(name) ~= "string" or name == "" then
+            return nil, ("page #%d: a page need a name"):format(index)
+        end
+
+        local page, pageError = Container.new(root, pageData, manager)
+        if not page then
+            return nil, pageError
+        end
+        pages[name] = page
+    end
+
+    if not pages[manager.default] then
+        return nil, ("default_page: no page named '%s'"):format(tostring(manager.default))
+    end
+    return pages
+end
+
 --- Create a manager. Don't build anything on the screen, you must call build().
 --- 
 --- The functions table is filled with the builtin functionsn then filled with the custom ones.
@@ -55,9 +94,31 @@ function PageManager.new(basalt, template, functions)
     return self
 end
 
+--- Build every pages from the template and show the default page
+--- Pages are built in a unique root which will be destroy if there is any error
+--- @return boolean built true if the pages were built
+--- @return string|nil message Message if the template is invalid
 function PageManager:build()
-    --- building logic
+    if self.built then
+        error("PageManager:build: pages are already built", 2)
+    end
+
+    local root = self.basaltMainFrame:addFrame({
+        width = self.basaltMainFrame.width,
+        height = self.basaltMainFrame.height,
+    })
+
+    local pages, buildError = buildPages(root, self)
+    if not pages then
+        root:destroy()
+        return false, buildError
+    end
+
+    self.root = root
+    self.pages = pages
     self.built = true
+
+    return self:showPage(self.default)
 end
 
 --- Show a page and hide every other ones. If page don't exist, don't change anything.
