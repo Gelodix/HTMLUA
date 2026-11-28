@@ -55,6 +55,8 @@ local function buildPages(root, manager)
             return nil, ("page #%d: a page need a name"):format(index)
         end
 
+        if pages[name] then return nil, ("page #%d: duplicate page name '%s'"):format(index, name) end
+
         local page, pageError = Container.new(root, pageData, manager)
         if not page then
             return nil, pageError
