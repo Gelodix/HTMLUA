@@ -15,8 +15,9 @@ PageManager.__index = PageManager
 local BUILTIN_FUNCTIONS = {
     --- Change the current shown page. Use in template : {"redirect", "pageName"}
     --- @param manager PageManager
+    --- @param element Element Element triggering the action
     --- @param pageName string Name of the page to show
-    redirect = function(manager, pageName)
+    redirect = function(manager, element, pageName)
         local shown, showError = manager:showPage(pageName)
         if not shown then error("redirect: " .. showError, 0)end
     end,
